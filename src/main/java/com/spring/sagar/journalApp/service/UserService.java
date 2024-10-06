@@ -20,19 +20,43 @@ public class UserService {
     private static final PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
 
     public void saveNewUser(User user) {
-        user.setPassword(passwordencoder.encode(user.getPassword()));
-        user.setRoles(List.of("USER"));
-        userRepository.save(user);
+        try{
+            user.setPassword(passwordencoder.encode(user.getPassword()));
+            user.setRoles(List.of("USER"));
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving new user", e);
+        }
+    }
+
+    public void saveUser(User user) {
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while saving user", e);
+        }
     }
 
     public void updateUser(User user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User userInDB = userRepository.findByUsername(username);
-        if(userInDB != null) {
-            userInDB.setPassword(user.getPassword());
-            userInDB.setUsername(user.getUsername());
-            saveNewUser(userInDB);
+        try{
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            User userInDB = userRepository.findByUsername(username);
+            if(userInDB != null) {
+                userInDB.setPassword(user.getPassword());
+                userInDB.setUsername(user.getUsername());
+                saveNewUser(userInDB);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while updating user", e);
+        }
+    }
+
+    public List<User> getAllUsers() {
+        try{
+            return userRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Error while getting all users", e);
         }
     }
 
